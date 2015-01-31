@@ -187,18 +187,26 @@ def visit_If(node, state):
 		depth += 1	
 		a.append(NodeWalker().generic_visit(node.test))
 		a.append(')')
-	else:
+	elif (state == 'else'):
 		a.append('else')
-	a.append('{')
-	for t in node.body:
-		a.append(tokenizeNode(t))
-	if (type(node.orelse).__name__ == 'elif'):#node.orelse != []):
-		a.append(visit_If(node.orelse, 'elif'))
-	elif(type(node.orelse)).__name__ == 'else'):
-		a.append(visit_If(node.orelse, 'else'))
-	else:
+		a.append('{')
+		for t in node:
+			a.append(tokenizeNode(t))
 		a.append('}')
-		return a
+	a.append('{')
+	if (state != 'else'):
+		for t in node.body:
+			a.append(tokenizeNode(t))
+	else:
+		pass
+	a.append('}')
+	if (len(node.orelse) != 0):
+		for b in node.orelse:
+			if (type(b).__name__ == "If"):
+				a.append(visit_If(b, 'elif'))
+			else:
+				a.append(visit_If(node.orelse, 'else'))
+
 
 def visit_Comparison(node):
 	a = []

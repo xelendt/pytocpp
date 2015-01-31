@@ -11,8 +11,13 @@ if ( a > 5):
 	a = 3
 elif (b == a ):
 	b += 2
-else:
 	b = 2
+	b = 3
+else:
+	if(a == 1.5):
+		a = 0
+	b = 2
+	b = 3
 
 a = a > b < a < b > a == b
 
