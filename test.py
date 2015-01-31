@@ -1,10 +1,11 @@
-import math
+#import math
 
 a = 5**1
 a = (4+3)+ 4
-a += 2
+a = 5
+a = (-a + 5)
 
-for i in range(1, 10):
-	print i
+#for i in range(1, 10):
+#	print i
 
-print a
+#print a
