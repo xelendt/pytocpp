@@ -20,6 +20,7 @@ def visit_BinOp(node, i):
 	else:
 		return node.n
 
+
 class NodeWalker(ast.NodeVisitor):
     def __init__(self):
         self.indent=''
@@ -90,7 +91,12 @@ class NodeWalker(ast.NodeVisitor):
 				cppcode += str(children[0])
 				cppcode += '>>'
 				cppcode += str(children[2])
-				
+			elif (children[1] == 'BitOr'):
+				cppcode += str(children[0])
+				cppcode += "|"
+				cppcode += str(children[2])
+			elif (children[1] == "BitAnd"):
+				pass
 #	elif (type(node).__name__ == 
 		else:
 			self.visitChildren(node)
