@@ -38,7 +38,7 @@ def tokenizeNode(node):
 def get_Type(node):
 	if (type(node).__name__ in literals):
 		if (type(node).__name__ == 'Num'):
-			return type(node.n)
+			return type(node.n).__name__
 		else:
 			return type(node).__name__
 	elif (type(node).__name__ == 'Compare'):
@@ -50,10 +50,10 @@ def get_Type(node):
 		right = get_Type(node.right)
 		if left == 'Str' or left == 'NameConstant':
 			return left
-		elif (get_Type(type(node.left)) == "float" or get_Type(type(node.right)) == "float"):
-			return type(1.2) #float
+		elif (left == 'float' or right == 'float'):
+			return type(1.2).__name__ #float
 		else:
-		 	return type(1) #int
+		 	return type(1).__name__ #int
 
 def visit_Assign(node):
 	''' TODO
@@ -63,30 +63,33 @@ def visit_Assign(node):
 	'''
 	global depth, variables
 	a = []	
-
+	
+#	print get_Type(node.value)
 	variableType = get_Type(node.value)
 
 	for t in node.targets:
 		if (type(t).__name__ == 'Name'):
+			print "HELLO!!!"
+			print variableType
 			if t.id not in variables:
-				if (variableType.__name__ == 'NameConstant'):
+				if (variableType == 'NameConstant'):
 					a.append("bool " + str(t.id) + ";\n")
-				elif (variableType.__name__ == 'Str'):
+				elif (variableType == 'Str'):
 					a.append("string " + str(t.id) + ";\n")
-				elif (variableType.__name__ == 'float'):
+				elif (variableType == 'float'):
 					a.append("double " + str(t.id) + ";\n")
-				elif (variableType.__name__ == 'int'):
+				elif (variableType == 'int'):
 					a.append("int " + str(t.id) + ";")
 				variables.append(t.id)
 		else:	
 			if t.id not in variables:
-				if (variableType.__name__ == 'NameConstant'):
+				if (variableType == 'NameConstant'):
 					a.append("bool* " + str(t.id) + ";\n")
-				elif (variableType.__name__ == 'Str'):
+				elif (variableType == 'Str'):
 					a.append("string* " + str(t.id) + ";\n")
-				elif (variableType.__name__ == 'float'):
+				elif (variableType == 'float'):
 					a.append("double* " + str(t.id) + ";\n")
-				elif (variableType.__name__ == 'int'):
+				elif (variableType == 'int'):
 					a.append("int* " + str(t.id) + ";")
 				variables.append(t.id)
 
@@ -250,10 +253,7 @@ def visit_Comparison(node):
 #			a.append('==')
 		a.append(tokenizeNode(node.comparators[i+1]))
 
-		
-
 	''' for a < b < c < d < e, you have to do a == b && b == c && c == d etc ... '''
-
 
 	return a
 
@@ -279,6 +279,21 @@ def visit_UnaryOp(node):
 		a.append(NodeWalker().generic_visit(node.operand))
 
 	return a
+
+def visit_While(node):
+	a = []
+	global depth
+	''' first declare the test '''
+	a.append('while(')
+	a.append(tokenizeNode(node.test))
+	a.append(')')
+	a.append('{')
+	for stmt in node.body:
+		a.append(tokenizeNode(stmt))
+	a.append('}')
+
+	return a
+	
 
 class NodeWalker(ast.NodeVisitor):
     def __init__(self):
@@ -313,6 +328,8 @@ class NodeWalker(ast.NodeVisitor):
 			a += visit_Comparison(node)
 		elif (type(node).__name__ == 'If'):
 			a += visit_If(node, 'if')
+		elif (type(node).__name__ == 'While'):
+			a += visit_While(node)
 		else:
 			self.visitChildren(node)
 
