@@ -191,21 +191,23 @@ def visit_If(node, state):
 		a.append('else')
 		a.append('{')
 		for t in node:
+			depth += 1
 			a.append(tokenizeNode(t))
-		a.append('}')
+
+		a.append('}')	
+		return a
+
 	a.append('{')
-	if (state != 'else'):
-		for t in node.body:
-			a.append(tokenizeNode(t))
-	else:
-		pass
+	for t in node.body:
+		a.append(tokenizeNode(t))
 	a.append('}')
-	if (len(node.orelse) != 0):
-		for b in node.orelse:
-			if (type(b).__name__ == "If"):
-				a.append(visit_If(b, 'elif'))
-			else:
-				a.append(visit_If(node.orelse, 'else'))
+
+	if (node.orelse != []):
+		for el in node.orelse:
+			if (type(el).__name__ == 'If'):
+				visit_If(node.orelse, 'elif')
+			elif (type(el).__name__ == 'list'):
+				visit_If(el, 'else')
 
 
 def visit_Comparison(node):
