@@ -421,4 +421,17 @@ cppcode += NodeWalker().generic_visit(pycode)
 #print cppcode
 #for elmt in cppcode:
 #	print elmt
-print printArray(cppcode)
+def translate(source):
+	pycode = ast.parse (source, mode = 'eval')
+	cppcode = ["#include <cmath>",
+		  	"#include <iostream>",
+			"#include <cstdlib>",
+			"#include <string>",
+			"#include <array>",
+			"using namespace std;"]
+
+	cppcode += NodeWalker().generic_visit(pycode)
+
+	output = printArray(cppcode)
+	
+	return output
