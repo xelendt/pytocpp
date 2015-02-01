@@ -177,38 +177,39 @@ def visit_BinOp(node):
 def visit_If(node, state):
 	global depth
 	a = []
-	if (state == 'if'):
-		a.append('if(')
-		depth += 1
-		a.append(NodeWalker().generic_visit(node.test))
+	if (state == 'if' or state == 'elif'):
+		''' say the test'''
+		if (state == 'if'):
+			a.append('if')
+		else:
+			a.append('else if')
+		a.append('(')
+		a.append(tokenizeNode(node.test))
 		a.append(')')
-	elif (state == 'elif'):
-		a.append('else if(')
-		depth += 1	
-		a.append(NodeWalker().generic_visit(node.test))
-		a.append(')')
+
+		''' say the body '''
+		a.append('{')
+		for b in node.body:
+			a.append(tokenizeNode(b))
+		a.append('}')
+
+		''' check for orelse '''
+
+		if(node.orelse != []):
+			if (type(node.orelse[0]).__name__ == 'If'):
+				for stmt in node.orelse:
+					a.append(visit_If(stmt, 'elif'))
+			else:
+				a.append(visit_If(node.orelse, 'else'))
 	elif (state == 'else'):
+		''' only need to state the body and then return a '''
 		a.append('else')
 		a.append('{')
-		for t in node:
-			depth += 1
-			a.append(tokenizeNode(t))
-
-		a.append('}')	
-		return a
-
-	a.append('{')
-	for t in node.body:
-		a.append(tokenizeNode(t))
-	a.append('}')
-
-	if (node.orelse != []):
-		for el in node.orelse:
-			if (type(el).__name__ == 'If'):
-				visit_If(node.orelse, 'elif')
-			elif (type(el).__name__ == 'list'):
-				visit_If(el, 'else')
-
+		for stmt in node:
+			a.append(tokenizeNode(stmt))
+		a.append('}')
+		
+	return a
 
 def visit_Comparison(node):
 	a = []

@@ -14,8 +14,6 @@ elif (b == a ):
 	b = 2
 	b = 3
 else:
-	if(a == 1.5):
-		a = 0
 	b = 2
 	b = 3
 
