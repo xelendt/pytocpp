@@ -1,22 +1,22 @@
 #import math
 
-''' Implements
-	- Binary Operators
-		+, -, *, **, /, <<, >>
-	- Unary Operators
-	 	+, -
-	- Boolean Operators
-		>, <, >=, <=, ==
-	- Assignments
-		int, float, bool, String
-	- Conditionals
-		if/elif/else
-	- Loops
-		While
-	'''
+#''' Implements
+#	- Binary Operators
+#		+, -, *, **, /, <<, >>
+#	- Unary Operators
+#	 	+, -
+#	- Boolean Operators
+#		>, <, >=, <=, ==
+#	- Assignments
+#		int, float, bool, String
+#	- Conditionals
+#		if/elif/else
+#	- Loops
+#		While
+#	'''
 
-for i in range (1, 10, 2):
-	a = 1
+#for i in range (1, 10, 2):
+#	a = 1
 
 a = [1, 2.3, 4, 5, 6]
 

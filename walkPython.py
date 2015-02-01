@@ -5,6 +5,7 @@ cppcode = ["#include <cmath>",
 		  	"#include <iostream>",
 			"#include <cstdlib>",
 			"#include <string>",
+			"#include <array>",
 			"using namespace std;"]
 
 parents = []
@@ -33,7 +34,7 @@ def tokenizeNode(node):
 		a.append(tokenize(node))
 	else:
 		depth += 1
-		print "DEPTH", depth
+#	print "DEPTH", depth
 		a.append(NodeWalker().generic_visit(node))
 	return a
 
@@ -144,14 +145,14 @@ def visit_BoolOp(node):
 	a = []
 	global depth
 	for t in node.values:
-		print "Node name", type(t).__name__
+#	print "Node name", type(t).__name__
 		if (type(t).__name__ in literals):
 			a.append(tokenize(t))
 		else:
 			depth += 1
 			a.append(generic_visit(t))
 	
-	print node.op
+#	print node.op
 	if (type(node.op).__name__ == 'And'):
 		a = a[0] + "&&" + a[1]
 	elif (type(node.op).__name__ == 'Or'):
@@ -373,11 +374,11 @@ class NodeWalker(ast.NodeVisitor):
 	
     def generic_visit(self, node):
 		global cppcode, depth
-		print self.indent, 'Generic visit', node, type(node).__name__
+#print self.indent, 'Generic visit', node, type(node).__name__
 		a = []
 		if (type(node).__name__ == 'BinOp'):
 			a += visit_BinOp(node)
-			print a
+#			print a
 		elif (type(node).__name__ == 'UnaryOp'):
 			a += visit_UnaryOp(node)
 		elif (type(node).__name__ == 'Assign'):
@@ -406,7 +407,7 @@ class NodeWalker(ast.NodeVisitor):
 def printArray(a):
 	string = ""
 	for i in a:
-		if (type(i).__name__ == 'List'):
+		if (type(i).__name__ == 'list'):
 			string += printArray(i)
 		else:
 			string += str(i)
@@ -420,3 +421,4 @@ cppcode += NodeWalker().generic_visit(pycode)
 #print cppcode
 #for elmt in cppcode:
 #	print elmt
+print printArray(cppcode)
