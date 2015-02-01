@@ -9,7 +9,7 @@ cppcode = ["#include <cmath>",
 
 parents = []
 
-literals = ['Num', 'Str', 'Bytes', 'Name', 'NameConstant', 'float', 'int']
+literals = ['Num', 'Str', 'Bytes', 'Name', 'NameConstant', 'float', 'int', 'List']
 variables = []
 
 def tokenize(node):
@@ -33,6 +33,7 @@ def tokenizeNode(node):
 		a.append(tokenize(node))
 	else:
 		depth += 1
+		print "DEPTH", depth
 		a.append(NodeWalker().generic_visit(node))
 	return a
 
@@ -40,6 +41,8 @@ def get_Type(node):
 	if (type(node).__name__ in literals):
 		if (type(node).__name__ == 'Num'):
 			return type(node.n).__name__
+		elif (type(node).__name__ == 'List'):
+			return type(node).__name__
 		else:
 			return type(node).__name__
 	elif (type(node).__name__ == 'Compare'):
@@ -79,6 +82,29 @@ def visit_Assign(node):
 					a.append("double " + str(t.id) + ";\n")
 				elif (variableType == 'int'):
 					a.append("int " + str(t.id) + ";")
+				elif (variableType == 'List'):
+					l = []
+					''' declare the list '''
+					if (len(node.value.elts) > 0):
+						arrayType = get_Type(node.value.elts[0])
+						''' put down the corresponding type declaration for the arrayType '''
+					
+						if (arrayType == 'float' or arrayType == 'int'):
+							l.append('double ')
+						elif (arrayType == 'Str'):
+							l.append('string ')
+
+						''' put down the variable name '''
+						l.append(str(t.id))
+						l.append('[' + str(len(node.value.elts))+ ']={')
+						l.append(tokenizeNode(node.value.elts[0]))
+						for e in range(1, len(node.value.elts)):
+							l.append(',')
+							l.append(tokenizeNode(node.value.elts[e]))
+						
+						l.append('};')
+					a.append(l)	
+					continue
 				variables.append(t.id)
 		else:	
 			if t.id not in variables:
@@ -93,10 +119,13 @@ def visit_Assign(node):
 				variables.append(t.id)
 
 	for t in node.targets:
-		a.append(t.id + ' = ' )
+		if (type(node.value).__name__ != 'List'):
+			a.append(t.id + ' = ' )
 	if (type(node.value).__name__ in literals):
 		if ((type(node.value).__name__ == 'Num')):
 			a.append(node.value.n)
+		elif (type(node.value).__name__ == 'List'):
+			pass
 		elif (node.value.id == 'True'):
 			a.append("true")
 		elif (node.value.id == "False"):
@@ -179,6 +208,7 @@ def visit_BinOp(node):
 """NOTE: THIS IMPLEMENTATION DOES NOT TAKE INTO ACCOUNT TO THE SEMI-COLONS INSIDE THE IF STRUCTURE!!!"""
 def visit_If(node, state):
 	global depth
+#depth -= 1
 	a = []
 	if (state == 'if' or state == 'elif'):
 		''' say the test'''
@@ -194,6 +224,7 @@ def visit_If(node, state):
 		a.append('{')
 		for b in node.body:
 			a.append(tokenizeNode(b))
+			a.append(';\n')
 		a.append('}')
 
 		''' check for orelse '''
@@ -210,6 +241,7 @@ def visit_If(node, state):
 		a.append('{')
 		for stmt in node:
 			a.append(tokenizeNode(stmt))
+			a.append(';\n')
 		a.append('}')
 		
 	return a
@@ -283,6 +315,7 @@ def visit_UnaryOp(node):
 def visit_While(node):
 	a = []
 	global depth
+#	depth -=1
 	''' first declare the test '''
 	a.append('while(')
 	a.append(tokenizeNode(node.test))
@@ -290,10 +323,37 @@ def visit_While(node):
 	a.append('{')
 	for stmt in node.body:
 		a.append(tokenizeNode(stmt))
+		a.append(';\n')
 	a.append('}')
 
 	return a
-	
+
+def visit_For(node):
+	a = []
+	'''
+	if (type(node.iter).__name__ == "Call"):
+		print node.iter.func, "WHY OH WHY"
+		if (node.iter.func.id == 'range'):
+			print "WHY DOES THIS HAPPEN", tokenizeNode(node.iter.args[0])[0]
+			node.iter = ast.expr()
+			node.iter.range(tokenizeNode(node.iter.args[0])[0], tokenizeNode(node.iter.args[1])[0], tokenizeNode(node.iter.args[2])[0]))
+	'''
+	assignop = ast.Assign()
+	assignop.targets = [ast.Name(id = 'forlist', ctx=ast.Store())]
+	assignop.value = node.iter
+
+	a.append(visit_Assign(assignop))
+
+	arrayType = a[0][0][0]
+
+	a.append('for(int pyceptionlol = 0; pyceptionlol < forlist.size();pyceptionlol ++)')
+	a.append('{')
+	a.append(str(arrayType) + str(node.target.id) + '=forlist[pyceptionlol]')
+	for b in node.body:
+		a.append(tokenizeNode(b))
+	a.append('}')
+
+	return a
 
 class NodeWalker(ast.NodeVisitor):
     def __init__(self):
@@ -330,6 +390,8 @@ class NodeWalker(ast.NodeVisitor):
 			a += visit_If(node, 'if')
 		elif (type(node).__name__ == 'While'):
 			a += visit_While(node)
+		elif (type(node).__name__ == 'For'):
+			a += visit_For(node)
 		else:
 			self.visitChildren(node)
 
@@ -341,12 +403,20 @@ class NodeWalker(ast.NodeVisitor):
 		 	depth -=1
 		return a
 
+def printArray(a):
+	string = ""
+	for i in a:
+		if (type(i).__name__ == 'List'):
+			string += printArray(i)
+		else:
+			string += str(i)
+	return string
 
 pycode = ast.parse(open(sys.argv[1]).read(), sys.argv[1])
 
-print ast.dump(pycode)
+#print ast.dump(pycode)
 #NodeWalker().visit(pycode)
 cppcode += NodeWalker().generic_visit(pycode)
-print cppcode
-for elmt in cppcode:
-	print elmt
+#print cppcode
+#for elmt in cppcode:
+#	print elmt
