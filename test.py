@@ -1,5 +1,25 @@
 #import math
 
+''' Implements
+	- Binary Operators
+		+, -, *, **, /, <<, >>
+	- Unary Operators
+	 	+, -
+	- Boolean Operators
+		>, <, >=, <=, ==
+	- Assignments
+		int, float, bool, String
+	- Conditionals
+		if/elif/else
+	- Loops
+		While
+	'''
+
+d = 1.5 + 2
+
+while (a > b):
+	a = 1
+
 a = b = 1.5
 
 a = 5**1
@@ -26,7 +46,10 @@ b = False
 
 c = a or b
 
+print 1 + 3
+
 #for i in range(1, 10):
 #	print i
 
 #print a
+

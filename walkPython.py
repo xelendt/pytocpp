@@ -25,6 +25,7 @@ def tokenize(node):
 		else:
 			return node.id
 
+"""NOTE: FUNCTIONS THAT CALL THIS ALREADY HAVE LISTS WITHIN THEIR FUNCTIONS; THE 'a' VARIABLE IS NOT NEEDED"""
 def tokenizeNode(node):
 	a = []
 	global literals, depth
@@ -69,8 +70,6 @@ def visit_Assign(node):
 
 	for t in node.targets:
 		if (type(t).__name__ == 'Name'):
-			print "HELLO!!!"
-			print variableType
 			if t.id not in variables:
 				if (variableType == 'NameConstant'):
 					a.append("bool " + str(t.id) + ";\n")
@@ -177,6 +176,7 @@ def visit_BinOp(node):
 
 	return a
 
+"""NOTE: THIS IMPLEMENTATION DOES NOT TAKE INTO ACCOUNT TO THE SEMI-COLONS INSIDE THE IF STRUCTURE!!!"""
 def visit_If(node, state):
 	global depth
 	a = []
